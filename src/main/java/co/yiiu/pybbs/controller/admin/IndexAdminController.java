@@ -85,6 +85,12 @@ public class IndexAdminController extends BaseAdminController {
     // 登录后台
     @GetMapping("/adminlogin")
     public String adminlogin() {
+        // ----------------hb
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.isAuthenticated() || subject.isRemembered()) {
+            return "redirect:/admin/index"; // 已登录或记住我 → 不再显示登录页
+        }
+        // ----------------hb
         return "admin/login";
     }
 

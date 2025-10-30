@@ -19,8 +19,11 @@ public class MyCredentialsMatcher implements CredentialsMatcher {
         // 但是！！！！！ token里转成String要先强转成 char[]
         // 而info里取Credentials就可以直接使用 String.valueOf() 转成String
         // 醉了。。
+        // 用户输入的密码
         String rawPassword = String.valueOf((char[]) token.getCredentials());
+        // 数据库加密的密码
         String encodedPassword = String.valueOf(info.getCredentials());
+        // 匹配密码
         return new BCryptPasswordEncoder().matches(rawPassword, encodedPassword);
     }
 }

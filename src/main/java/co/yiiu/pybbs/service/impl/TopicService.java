@@ -1,10 +1,12 @@
 package co.yiiu.pybbs.service.impl;
 
+import co.yiiu.pybbs.config.websocket.MyWebSocket;
 import co.yiiu.pybbs.mapper.TopicMapper;
 import co.yiiu.pybbs.model.Tag;
 import co.yiiu.pybbs.model.Topic;
 import co.yiiu.pybbs.model.User;
 import co.yiiu.pybbs.service.*;
+import co.yiiu.pybbs.util.Message;
 import co.yiiu.pybbs.util.MyPage;
 import co.yiiu.pybbs.util.SensitiveWordUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -72,8 +74,10 @@ public class TopicService implements ITopicService {
     @Override
     public List<Topic> selectAuthorOtherTopic(Integer userId, Integer topicId, Integer limit) {
         QueryWrapper<Topic> wrapper = new QueryWrapper<>();
+        // 查询该用户发布的话题，按发布时间降序排序
         wrapper.eq("user_id", userId).orderByDesc("in_time");
         if (topicId != null) {
+            // 排除当前话题
             wrapper.lambda().ne(Topic::getId, topicId);
         }
         if (limit != null) wrapper.last("limit " + limit);
@@ -159,6 +163,13 @@ public class TopicService implements ITopicService {
                 // 处理标签与话题的关联
                 topicTagService.insertTopicTag(topic.getId(), tagList);
             }
+        }
+        // 发送邮件通知
+        // 太多地方会调用TopService.update,导致通知很频繁
+        String emailTitle = "你收藏的话题 %s 更新了 快去看看吧！";
+        // 如果开启了websocket，就发网页通知，而且不要提醒自己
+        if (systemConfigService.selectAllConfig().get("websocket").equals("1")) {
+            MyWebSocket.broadcast("topic_" + topic.getId(), new Message("notification_group", String.format(emailTitle, topic.getTitle())), topic.getUserId());
         }
         // 索引话题
         indexedService.indexTopic(String.valueOf(topic.getId()), topic.getTitle(), topic.getContent());
@@ -246,7 +257,8 @@ public class TopicService implements ITopicService {
         }
         // 再把这些id按逗号隔开组成字符串
         topic.setUpIds(StringUtils.collectionToCommaDelimitedString(strings));
-        // 更新评论
+        // 更新评论，这里之所以用this,而不用topicServic
+        // 原因一：不需要往redis里缓存topic数据了，所以，不需要用AOP拦截
         this.update(topic, null);
         // 增加用户积分
         user.setScore(userScore);

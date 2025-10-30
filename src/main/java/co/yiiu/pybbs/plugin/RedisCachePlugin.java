@@ -56,6 +56,7 @@ public class RedisCachePlugin {
             if (s == null) {
                 topic.setView(topic.getView() + 1);
                 topicService.update(topic, null);
+                // 作者很巧妙地利用了redis的key过期特性来控制浏览量。
                 redisService.setString(String.format(RedisKeys.REDIS_TOPIC_VIEW_IP_ID_KEY, ip, topic.getId()), String.valueOf
                         (topic.getId()), Integer.parseInt(systemConfigService.selectAllConfig().get("topic_view_increase_interval").toString()));
             }

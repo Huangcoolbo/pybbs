@@ -52,6 +52,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addInterceptor(userInterceptor).addPathPatterns("/settings", "/settings/*", "/topic/create", "/topic/edit/*");
     }
 
+    // Spring 哪些 URL 请求不走 Controller，而是直接去找静态文件
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/", "file:./static/");

@@ -20,7 +20,7 @@ public class User implements Serializable {
     private Integer id;
     private String username;
     private String telegramName;
-    private String avatar;
+    private String avatar;   // 头像
     @JsonIgnore
     private String password;
     private String email;

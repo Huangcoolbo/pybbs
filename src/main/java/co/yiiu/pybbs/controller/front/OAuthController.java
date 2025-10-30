@@ -72,11 +72,11 @@ public class OAuthController extends BaseController {
 
         OAuthUser oAuthUser = oAuthUserService.selectByTypeAndLogin(type.toUpperCase(), authUser.getUsername());
         User user;
-        if (oAuthUser == null) {
+        if (oAuthUser == null) { // 第一次使用该社交帐号登录
             if (userService.selectByUsername(username) != null) {
                 username = username + githubId;
             }
-            // 先创建user，然后再创建oauthUser
+            // 先创建user(网站用户账号)，然后再创建oauthUser(第三方登录账号)，两者绑定
             user = userService.addUser(username, null, avatarUrl, email, bio, blog, StringUtils.isEmpty(email));
             oAuthUserService.addOAuthUser(Integer.parseInt(githubId), type.toUpperCase(), authUser.getUsername(), accessToken, bio, email, user.getId
                     (), null, null, null);

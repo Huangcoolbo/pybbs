@@ -45,11 +45,12 @@ public class CommentLayerPlugin {
                 boolean idIndexFlag = false, commentIdIndexFlag = false;
                 for (int i = newComments.size() - 1; i >= 0; i--) {
                     if (!idIndexFlag && comment.getCommentId().equals(newComments.get(i).getId())) {
-                        idIndex = i;
+                        idIndex = i;   // 父评论
                         idIndexFlag = true;
                     }
+                    // 注意这里不能用else if，因为可能出现评论回复自己的情况
                     if (!commentIdIndexFlag && comment.getCommentId().equals(newComments.get(i).getCommentId())) {
-                        commentIdIndex = i;
+                        commentIdIndex = i;  // 兄弟评论
                         commentIdIndexFlag = true;
                     }
                 }
@@ -59,8 +60,10 @@ public class CommentLayerPlugin {
                     int layer = newComments.get(idIndex).getLayer();
                     comment.setLayer(layer + 1);
                     int count = 0;
+                    // 评论里有可能出现多级回复同一个评论的情况
                     if (commentIdIndex != -1) {
                         for (CommentsByTopic newComment : newComments) {
+                            // 在已标记层级的评论里找出同级的评论数量
                             if (newComments.get(commentIdIndex).getId().equals(newComment.getCommentId())) count++;
                         }
                     }

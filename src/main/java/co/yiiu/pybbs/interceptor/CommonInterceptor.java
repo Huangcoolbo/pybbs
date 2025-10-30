@@ -65,6 +65,7 @@ public class CommonInterceptor implements HandlerInterceptor {
             // TODO 这地方有安全隐患，通过这个设置，就可以在页面上获取到system_config表里的所有数据了，如果有人恶意往页面里加入一些代码，就可以拿到一些不可告人的东西。。
             // 后面啥时候想起来了，再收拾它
             // 2023/3/14 过滤掉了systemConfig里type为password的数据，应该能提升一丢丢的安全性吧
+            // 将model中的每个配置项放入到site下，这样在页面上可以通过site.XXX来获取配置项
             modelAndView.addObject("site", systemConfigService.selectAllConfigWithoutPassword());
         }
     }

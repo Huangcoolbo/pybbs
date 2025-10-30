@@ -83,6 +83,11 @@ public class CommentService implements ICommentService {
     }
 
     // 保存评论
+    /*
+     * @param comment 评论对象
+     * @param topic 被评论的话题
+     * @param user 发表评论的用户
+     */
     @Override
     public Comment insert(Comment comment, Topic topic, User user) {
         if (systemConfigService.selectAllConfig().get("comment_need_examine").equals("1")) {
@@ -102,10 +107,10 @@ public class CommentService implements ICommentService {
         userService.update(user);
 
         // 通知
-        // 给评论的作者发通知
+        // 给被评论的作者发通知
         if (comment.getCommentId() != null) {
             Comment targetComment = this.selectById(comment.getCommentId());
-            if (!user.getId().equals(targetComment.getUserId())) {
+            if (!user.getId().equals(targetComment.getUserId())) { // 给自己回复自己就不发通知了
                 notificationService.insert(user.getId(), targetComment.getUserId(), topic.getId(), "REPLY", comment
                         .getContent());
 
@@ -190,13 +195,22 @@ public class CommentService implements ICommentService {
     }
 
     // 对评论点赞
+    /*
+     * @param comment 被点赞的评论
+     * @param user 当前去点赞的用户
+     * @return 返回评论的点赞数
+     */
     @Override
     public int vote(Comment comment, User user) {
+        // 获取评论的点赞用户id字符串
         String upIds = comment.getUpIds();
         // 将点赞用户id的字符串转成集合
         Set<String> strings = StringUtils.commaDelimitedListToSet(upIds);
         // 把新的点赞用户id添加进集合，这里用set，正好可以去重，如果集合里已经有用户的id了，那么这次动作被视为取消点赞
-        Integer userScore = user.getScore();
+        // Integer userScore = user.getScore();
+        User targetUser = userService.selectById(comment.getUserId());
+        Integer userScore = targetUser.getScore();
+        // 是被点赞的人加积分
         if (strings.contains(String.valueOf(user.getId()))) { // 取消点赞行为
             strings.remove(String.valueOf(user.getId()));
             userScore -= Integer.parseInt(systemConfigService.selectAllConfig().get("up_comment_score"));
@@ -209,8 +223,9 @@ public class CommentService implements ICommentService {
         // 更新评论
         this.update(comment);
         // 增加用户积分
-        user.setScore(userScore);
+        targetUser.setScore(userScore);
         userService.update(user);
+        userService.updateNoSetSession(targetUser);
         return strings.size();
     }
 

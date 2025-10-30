@@ -6,7 +6,9 @@ public class Message implements Serializable {
 
     private static final long serialVersionUID = 1244988167184789309L;
 
+    // 消息类型
     private String type;
+    // 消息载荷
     private Object payload;
 
     public Message() {

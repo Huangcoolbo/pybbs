@@ -23,11 +23,13 @@ public class FileUploadPlugin {
     @Resource
     private FileUtil fileUtil;
 
+    // 执行FileUtileHook.upload()方法时会调用FileUploadPlugin.upload()方法
+    // 当执行FileUtil.upload()方法时,会被拦截到这里，配置之后再决定调用哪个上传方法
     @Around("co.yiiu.pybbs.hook.FileUtilHook.upload()")
     public Object upload(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         String cloudStoragePlatform = systemConfigService.selectAllConfig().get("cloud_storage_platform");
         log.info("fileUtilHook.upload: {}", cloudStoragePlatform);
-        Object[] args = proceedingJoinPoint.getArgs();
+        Object[] args = proceedingJoinPoint.getArgs(); // 获取被拦截方法的参数
         if (StringUtils.isEmpty(cloudStoragePlatform) || UploadPlatForm.LOCAL.name().equals(cloudStoragePlatform)) {
             return proceedingJoinPoint.proceed(args);
         } else if (UploadPlatForm.QINIU.name().equals(cloudStoragePlatform)) {

@@ -9,6 +9,7 @@
                 socket.send(JSON.stringify({type: type, payload: payload}));
             }
 
+            // 连接建立时触发
             socket.onopen = function (event) {
                 emit('bind', {userId: ${_user.id}, username: '${_user.username!}'});
             }
@@ -19,7 +20,7 @@
             socket.onerror = function (event) {
                 console.log('websocket error: ', event);
             }
-
+            // 客户端接收服务端发送(sendObject())的消息
             socket.onmessage = function (event) {
                 var data = JSON.parse(event.data);
                 if (data.type === 'bind') {
@@ -28,10 +29,12 @@
                     // 绑定成功后找server要当前未读消息数量
                     emit('notReadCount', {});
                 } else if (data.type === 'notifications') {
+                    // 弹出消息提示
                     tip(data.payload);
                 } else if (data.type === 'notification_notread') {
                     var n_count = $("#n_count");
                     var nh_count = $("#nh_count");
+                    // 加上新收到的未读消息数量
                     if (n_count) n_count.text(parseInt(n_count.text()) + data.payload);
                     var notReadTotalCount = 0;
                     if (nh_count.text().length === 0) {
@@ -41,8 +44,12 @@
                     }
                     if (notReadTotalCount > 0) {
                         nh_count.text(notReadTotalCount);
+                        // 网页标签页（tab）上显示的标题文本
                         document.title = "(" + notReadTotalCount + ") " + documentTitle;
                     }
+                } else if (data.type === 'notification_group') {
+                    // 按组群发
+                    tip(data.payload);
                 }
             }
 

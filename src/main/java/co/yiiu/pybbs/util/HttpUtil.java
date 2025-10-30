@@ -11,6 +11,8 @@ import java.io.IOException;
  */
 public class HttpUtil {
 
+    // 为true 这是一个 API 请求（希望拿 JSON、XML）
+    // 为false 这是一个网页请求（希望拿 HTML）
     public static boolean isApiRequest(HttpServletRequest request) {
         return request.getHeader("Accept") == null || !request.getHeader("Accept").contains("text/html");
     }

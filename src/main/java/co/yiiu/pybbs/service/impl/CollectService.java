@@ -88,6 +88,9 @@ public class CollectService implements ICollectService {
                 MyWebSocket.emit(topic.getUserId(), new Message("notifications", String.format(emailTitle, topic.getTitle(),
                         user.getUsername())));
             }
+            // 收藏该话题后，将用户添加到组里
+            MyWebSocket.joinGroup("topic_" + topicId, user.getId());
+
             User targetUser = userService.selectById(topic.getUserId());
             if (!StringUtils.isEmpty(targetUser.getEmail()) && targetUser.getEmailNotification()) {
                 String emailContent = "<a href='%s/notifications' target='_blank'>传送门</a>";
@@ -106,6 +109,9 @@ public class CollectService implements ICollectService {
         QueryWrapper<Collect> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(Collect::getTopicId, topicId).eq(Collect::getUserId, userId);
         collectMapper.delete(wrapper);
+
+        // 从群组里移除该用户
+        MyWebSocket.leaveGroup("topic_" + topicId, userId);
         // 对话题中冗余的collectCount字段收藏数量-1
         Topic topic = topicService.selectById(topicId);
         topic.setCollectCount(topic.getCollectCount() - 1);

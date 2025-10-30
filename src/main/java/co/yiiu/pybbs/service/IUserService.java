@@ -39,6 +39,9 @@ public interface IUserService {
     // 更新用户信息
     void update(User user);
 
+    // 更新用户信息，不设置session
+    void updateNoSetSession(User user);
+
     IPage<User> selectAll(Integer pageNo, String username);
 
     User selectByIdNoCatch(Integer id);

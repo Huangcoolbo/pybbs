@@ -1,5 +1,6 @@
 package co.yiiu.pybbs.directive;
 
+import co.yiiu.pybbs.plugin.ElasticSearchService;
 import co.yiiu.pybbs.service.ISystemConfigService;
 import co.yiiu.pybbs.service.ITopicService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,6 +25,8 @@ public class SearchDirective implements TemplateDirectiveModel {
     private ISystemConfigService systemConfigService;
     @Resource
     private ITopicService topicService;
+    @Resource
+    private ElasticSearchService elasticSearchService;
 
     @Override
     public void execute(Environment environment, Map map, TemplateModel[] templateModels, TemplateDirectiveBody
@@ -33,7 +36,7 @@ public class SearchDirective implements TemplateDirectiveModel {
         Integer pageNo = Integer.parseInt(map.get("pageNo").toString());
         if (!StringUtils.isEmpty(keyword)) {
             Integer pageSize = Integer.parseInt(systemConfigService.selectAllConfig().get("page_size").toString());
-//      page = elasticSearchService.searchDocument(pageNo, pageSize, keyword, "title", "content");
+            // page = elasticSearchService.searchDocument(pageNo, pageSize, keyword, "title", "content");
             page = topicService.search(pageNo, pageSize, keyword);
         }
 

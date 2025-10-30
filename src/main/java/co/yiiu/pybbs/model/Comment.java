@@ -27,6 +27,7 @@ public class Comment implements Serializable {
     private Integer tgMessageId;
     // true: 通过，false: 审核中
     private Boolean status;
+    // TODO 以后可以加个字段，记录评论的ip地址;还有修改时间
 
     public String getStyle() {
         return style;

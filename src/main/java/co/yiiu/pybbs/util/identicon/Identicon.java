@@ -84,6 +84,7 @@ public class Identicon {
         return "data:image/png;base64," + imgToBase64String(image, "png");
     }
 
+    // 生成并保存头像，返回头像的访问路径
     public String generator(String username) {
         Identicon identicon = new Identicon();
         String md5 = HashUtil.md5(StringUtil.randomString(6));

@@ -38,6 +38,7 @@ public class SocialPlugin {
         Map config = systemConfigService.selectAllConfig();
         String clientId = (String) config.get("oauth_" + source + "_client_id");
         String clientSecret = (String) config.get("oauth_" + source + "_client_secret");
+        // 设置回调地址
         String callback = (String) config.get("oauth_" + source + "_callback_url");
 
         Assert.isTrue(!StringUtils.isEmpty(clientId) && !StringUtils.isEmpty(clientSecret) && !StringUtils.isEmpty

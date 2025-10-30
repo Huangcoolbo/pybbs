@@ -43,6 +43,8 @@ public class FreemarkerConfig {
     @Resource
     private UserCollectsDirective userCollectsDirective;
     @Resource
+    private UserDialogsDirective userDialogsDirective;
+    @Resource
     private TopicCommentsDirective topicCommentsDirective;
     @Resource
     private SocialDirective socialDirective;
@@ -72,6 +74,7 @@ public class FreemarkerConfig {
         configuration.setSharedVariable("tag_user_topics", userTopicsDirective);
         configuration.setSharedVariable("tag_user_comments", userCommentsDirective);
         configuration.setSharedVariable("tag_user_collects", userCollectsDirective);
+        configuration.setSharedVariable("tag_user_dialogs", userDialogsDirective);
         configuration.setSharedVariable("tag_topic_comments", topicCommentsDirective);
         configuration.setSharedVariable("tag_social_list", socialDirective);
 

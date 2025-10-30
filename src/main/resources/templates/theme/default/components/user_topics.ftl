@@ -1,4 +1,5 @@
 <#macro user_topics pageNo pageSize username isPaginate=false isFooter=false>
+<#--调用时可以这样写 <@user_topics pageNo=1 pageSize=10 username="tomoya" />-->
     <div class="card">
         <@tag_user_topics username=username pageNo=pageNo pageSize=pageSize>
             <div class="card-header">${username}创建的话题</div>

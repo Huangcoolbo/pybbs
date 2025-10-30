@@ -97,6 +97,7 @@ public class UserService implements IUserService {
         if (!StringUtils.isEmpty(password)) user.setPassword(new BCryptPasswordEncoder().encode(password));
         user.setToken(token);
         user.setInTime(new Date());
+        // 生成默认头像
         if (avatar == null) avatar = identicon.generator(username);
         user.setAvatar(avatar);
         user.setEmail(email);
@@ -205,7 +206,15 @@ public class UserService implements IUserService {
         HttpSession session = request.getSession();
         session.setAttribute("_user", user);
 
-        // 同类调用不走spring管理，无法使用aop编程调用
+        // 同类调用不走spring管理，无法使用aop编程调用，所以不用this,要通过SpringContextUtil获取代理类来调用
+        SpringContextUtil.getBean(UserService.class).delRedisUser(user);
+    }
+
+    // 更新用户信息，不设置session
+    @Override
+    public void updateNoSetSession(User user) {
+        userMapper.updateById(user);
+        // 同类调用不走spring管理，无法使用aop编程调用，所以不用this,要通过SpringContextUtil获取代理类来调用
         SpringContextUtil.getBean(UserService.class).delRedisUser(user);
     }
 

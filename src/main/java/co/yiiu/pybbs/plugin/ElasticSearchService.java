@@ -109,7 +109,9 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
             if (this.instance() == null) return false;
             CreateIndexRequest request = new CreateIndexRequest(name);
             request.settings(Settings.builder().put("index.number_of_shards", 1).put("index.number_of_shards", 5));
+            // 相当于创建表结构的语句
             if (mappingBuilder != null) request.mapping(type, mappingBuilder);
+            // 向 ES 发送一个 创建索引请求。
             CreateIndexResponse response = this.client.indices().create(request, RequestOptions.DEFAULT);
             return response.isAcknowledged();
         } catch (IOException e) {
@@ -152,7 +154,9 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
         try {
             if (this.instance() == null) return;
             IndexRequest request = new IndexRequest(name, type, id);
+            // 新增文档数据
             request.source(source);
+            // 执行请求
             client.index(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
             log.error(e.getMessage());

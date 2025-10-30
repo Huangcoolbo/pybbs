@@ -123,12 +123,15 @@ public class ShiroConfig {
     public CookieRememberMeManager rememberMeManager() {
         //System.out.println("ShiroConfiguration.rememberMeManager()");
         CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
+        // 告诉 Shiro 使用哪一个 Cookie 对象来保存“记住我”信息。
         cookieRememberMeManager.setCookie(rememberMeCookie());
         //rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度(128 256 512 位)
+        // 加密remmemberMe的值的密钥
         cookieRememberMeManager.setCipherKey(Base64.encode("pybbs is the best!".getBytes()));
         return cookieRememberMeManager;
     }
 
+    // 负责处理登录表单请求
     @Bean
     public FormAuthenticationFilter formAuthenticationFilter() {
         FormAuthenticationFilter formAuthenticationFilter = new FormAuthenticationFilter();

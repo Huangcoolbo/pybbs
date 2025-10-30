@@ -43,7 +43,7 @@ public class CookieUtil {
         response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
     }
 
-
+    // ToStudy
     public String getCookie(String name) {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder
                 .getRequestAttributes())).getRequest();
@@ -64,7 +64,8 @@ public class CookieUtil {
                 .getRequestAttributes())).getResponse();
         Cookie cookie = new Cookie(name, null);
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(-1);
+        cookie.setValue("");
+        cookie.setMaxAge(0);
         cookie.setDomain(systemConfigService.selectAllConfig().get("cookie_domain"));
         cookie.setPath("/");
         assert response != null;

@@ -1,4 +1,5 @@
 <#include "../layout/layout.ftl"/>
+<#--话题详情页-->
 <@html page_title=topic.title page_tab="">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
     <div class="row">

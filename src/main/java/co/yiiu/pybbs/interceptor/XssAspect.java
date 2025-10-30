@@ -63,6 +63,7 @@ public class XssAspect {
             java.lang.reflect.Method method = targetClass.getMethod(methodName, parameterTypes);
 
             // 构建完整的请求路径
+            // 根据类级别 + 方法级别的映射注解，拼出一个完整的接口路径字符串。
             String fullPath = buildRequestPath(classMapping, method);
 
             return isMarkdownPath(fullPath, method);
@@ -127,7 +128,7 @@ public class XssAspect {
     }
 
     /**
-     * 原来的基本清理方法
+     * 原来的基本清理方法，过滤HTML标签
      */
     private Map<String, String> sanitizeMap(Map<String, String> map) {
         Map<String, String> sanitized = new HashMap<>();

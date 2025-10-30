@@ -1,6 +1,7 @@
 package co.yiiu.pybbs.directive;
 
 import co.yiiu.pybbs.model.User;
+import co.yiiu.pybbs.service.IDialogService;
 import co.yiiu.pybbs.service.ITopicService;
 import co.yiiu.pybbs.service.IUserService;
 import freemarker.core.Environment;

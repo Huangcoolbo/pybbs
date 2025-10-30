@@ -17,8 +17,8 @@ public class MyPage<T> extends Page<T> {
     private long total;
     private long size;
     private long current;
-    private String[] ascs;
-    private String[] descs;
+    private String[] ascs; // 升序排序字段
+    private String[] descs; // 降序排序字段
     private boolean optimizeCountSql;
     private boolean isSearchCount;
 

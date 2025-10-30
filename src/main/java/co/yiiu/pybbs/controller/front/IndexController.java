@@ -17,6 +17,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Locale;
 
@@ -69,7 +70,7 @@ public class IndexController extends BaseController {
         return render("tag/tags");
     }
 
-    // 登录
+    // 登录页面
     @GetMapping("/login")
     public String login() {
         User user = getUser();
@@ -93,9 +94,18 @@ public class IndexController extends BaseController {
         return render("notifications");
     }
 
+    // 私信
+    @GetMapping("/dialogs")
+    public String dialogs(Model model) {
+        User user = userService.selectById(getUser().getId());
+        model.addAttribute("user", user);
+        model.addAttribute("message", null);
+        return render("dialogs");
+    }
+
     // 登出
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
         User user = getUser();
         if (user != null) {
             // 清除redis里的缓存
@@ -104,6 +114,7 @@ public class IndexController extends BaseController {
             session.removeAttribute("_user");
             // 清除cookie里的用户token
             cookieUtil.clearCookie(systemConfigService.selectAllConfig().get("cookie_name").toString());
+
         }
         return redirect("/");
     }

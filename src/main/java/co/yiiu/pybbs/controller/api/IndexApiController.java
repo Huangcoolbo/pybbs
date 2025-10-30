@@ -72,7 +72,7 @@ public class IndexApiController extends BaseApiController {
     public Result login(@RequestBody Map<String, String> body, HttpSession session) {
         String username = body.get("username");
         String password = body.get("password");
-        String captcha = body.get("captcha");
+        String captcha = body.get("captcha"); // 用户输入的验证码
         String _captcha = (String) session.getAttribute("_captcha");
         session.removeAttribute("_captcha");
         ApiAssert.notTrue(_captcha == null || StringUtils.isEmpty(captcha), "请输入验证码");

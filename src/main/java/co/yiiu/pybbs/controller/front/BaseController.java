@@ -24,6 +24,9 @@ public class BaseController {
         return "redirect:" + path;
     }
 
+    /*
+     *  获取当前登录用户
+     */
     protected User getUser() {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder
                 .getRequestAttributes())).getRequest();

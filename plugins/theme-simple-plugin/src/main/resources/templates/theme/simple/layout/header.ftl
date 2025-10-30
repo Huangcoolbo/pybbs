@@ -1,3 +1,4 @@
+<!-- head为函数名，参数为page_tab -->
 <#macro header page_tab>
     <header>
         <ul>
@@ -12,7 +13,8 @@
         <ul>
             <#if _user??>
                 <li <#if page_tab == "create">class="active"</#if>><a href="/topic/create">创建话题</a></li>
-                <li <#if page_tab == "notifications">class="active"</#if>><a href="/notifications">通知 <span
+                <li <#if page_tab == "dialog">class="active"</#if>><a href="/dialogs">私信</a></li>
+                <li <#if page_tab == "notifications">class="active"</#if>><a href="/notifications"> <span
                                 id="notReadCount">0</span></a></li>
                 <li <#if page_tab == "user">class="active"</#if>><a href="/user/${_user.username}">${_user.username}</a>
                 </li>
