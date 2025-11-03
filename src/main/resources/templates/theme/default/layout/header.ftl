@@ -32,11 +32,12 @@
             </div>
             <ul class="navbar-nav">
                 <#if _user??>
-                    <li class="nav-item <#if page_tab == "dialog">active</#if>>">
+                    <li class="nav-item <#if page_tab == "dialog">active</#if>">
                         <a href="/dialogs" class="nav-link">
                             <i class="fa fa-comments"></i> ${i18n.getMessage("private_message")}
                             <#--<span class="badge badge-default" id="dm_count"></span> -->
                         </a>
+                    </li>
                     <li class="nav-item <#if page_tab == "notification">active</#if>">
                         <a href="/notifications" class="nav-link">
                             <i class="fa fa-envelope"></i> ${i18n.getMessage("notification")}

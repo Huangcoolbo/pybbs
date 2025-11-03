@@ -1,6 +1,7 @@
 package co.yiiu.pybbs.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 
 import java.io.Serializable;
@@ -14,6 +15,8 @@ public class Dialog implements Serializable {
     private Integer userBId;
     private Integer unreadCount;
     private Integer messageCount;
+    private Integer lastMessageId;
+    private String lastMessage;
     private Date inTime;
 
     // getter / setter
@@ -63,5 +66,21 @@ public class Dialog implements Serializable {
 
     public void setUserAId(Integer userAId) {
         this.userAId = userAId;
+    }
+
+    public Integer getLastMessageId() {
+        return lastMessageId;
+    }
+
+    public void setLastMessageId(Integer lastMessageId) {
+        this.lastMessageId = lastMessageId;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
     }
 }

@@ -7,6 +7,8 @@ CREATE TABLE `dialog` (
     `user_b_id` int(11) NOT NULL COMMENT '接收用户ID',
     `unread_count` int(11) NOT NULL DEFAULT 0 COMMENT '未读消息数',
     `message_count` int(11) NOT NULL DEFAULT 0 COMMENT '消息总数',
+    `last_message_id` int(11) DEFAULT NULL COMMENT '最后一条消息ID',
+    `last_message` varchar(500) DEFAULT NULL COMMENT '最后一条消息内容',
     `in_time` datetime NOT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`),
     KEY `user_a_id` (`user_a_id`),

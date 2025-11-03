@@ -28,6 +28,12 @@
                     console.log("ws与当前登录用户绑定成功");
                     // 绑定成功后找server要当前未读消息数量
                     emit('notReadCount', {});
+                } else if (data.type === 'dialog_message') {
+                    // 私信消息
+                    tip(data.payload);
+                    setInterval(function() {
+                        location.reload();
+                    }, 1000);
                 } else if (data.type === 'notifications') {
                     // 弹出消息提示
                     tip(data.payload);
@@ -51,6 +57,7 @@
                     // 按组群发
                     tip(data.payload);
                 }
+
             }
 
         }

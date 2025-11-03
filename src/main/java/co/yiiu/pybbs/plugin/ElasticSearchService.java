@@ -103,10 +103,11 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
         }
     }
 
-    // 创建索引
+    // 创建索引 PUT http://localhost:9200/topic
     public boolean createIndex(String type, XContentBuilder mappingBuilder) {
         try {
             if (this.instance() == null) return false;
+            // 创建索引的请求
             CreateIndexRequest request = new CreateIndexRequest(name);
             request.settings(Settings.builder().put("index.number_of_shards", 1).put("index.number_of_shards", 5));
             // 相当于创建表结构的语句
@@ -239,7 +240,7 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
      * @param pageNo
      * @param pageSize
      * @param keyword  要查询的内容
-     * @param fields   要查询的字段，可以为多个
+     * @param fields   要查询的字段，可以为多个 这里为"title","content"
      * @return 分页对象 {@link Page}
      */
     public MyPage<Map<String, Object>> searchDocument(Integer pageNo, Integer pageSize, String keyword, String... fields) {
@@ -247,6 +248,7 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
             if (this.instance() == null) return new MyPage<>();
             SearchRequest request = new SearchRequest(name);
             SearchSourceBuilder builder = new SearchSourceBuilder();
+            // “在 title 和 content 两个字段里查包含 keyword 的文档
             builder.query(QueryBuilders.multiMatchQuery(keyword, fields));
             builder.from((pageNo - 1) * pageSize).size(pageSize);
             request.source(builder);

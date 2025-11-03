@@ -54,6 +54,14 @@ public class DialogService implements IDialogService {
         MyPage<Map<String, Object>> page = dialogMapper.selectByUserId(iPage, userId);
         for(Map<String, Object> d : page.getRecords()) {
             Integer dialogId = (Integer) d.get("id");
+            Dialog dialog = dialogMapper.selectById(dialogId);
+
+            Message lastMessage = messageService.selectById(dialog.getLastMessageId());
+            if(lastMessage != null) {
+                User lastUser = userService.selectById(lastMessage.getSenderId());
+                d.put("lastusername", lastUser.getUsername());
+                d.put("lastmessage", dialog.getLastMessage());
+            }
             Integer userBId = (Integer) d.get("userBId");
             User toUser = new User();
             if(userId.equals(userBId)) {
@@ -63,7 +71,9 @@ public class DialogService implements IDialogService {
                 toUser = userService.selectById(userBId);
             }
             String username = toUser.getUsername();
+            // 设置对话另一方的用户名
             d.put("username", username);
+
         }
         return page;
     }

@@ -53,6 +53,9 @@ public class DialogApiController extends BaseApiController{
         User toUser = userService.selectByUsername(username);
         ApiAssert.notNull(toUser, "用户不存在");
         Dialog dialog = dialogService.selectByUser(getApiUser(), toUser);
+        if(dialog == null) {
+            return success();
+        }
         dialog.setUserAId(getApiUser().getId());
         dialog.setUserBId(toUser.getId());
         return success(dialog);

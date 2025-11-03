@@ -141,6 +141,10 @@
                         return;
                     }
                     const d = resp.detail || {};
+                    if(!d.id) {
+                        setState(true, '可以发起会话');
+                        return;
+                    }
                     if (!d.userBId) {
                         setState(false, '用户不存在');
                         return;

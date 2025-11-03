@@ -24,7 +24,8 @@
 <#--                                        </small>-->
                                     </div>
                                     <div class="text-muted small text-truncate" style="max-width:220px;">
-                                        ${dialog.lastMessage!""}
+<#--                                        dialog没有username字段，为什么这里能用？-->
+                                        ${dialog.lastusername!?html} · ${dialog.lastMessage!?html}
                                     </div>
                                 </div>
                                 <button type="button"

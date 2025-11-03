@@ -36,8 +36,8 @@ public class SearchDirective implements TemplateDirectiveModel {
         Integer pageNo = Integer.parseInt(map.get("pageNo").toString());
         if (!StringUtils.isEmpty(keyword)) {
             Integer pageSize = Integer.parseInt(systemConfigService.selectAllConfig().get("page_size").toString());
-            // page = elasticSearchService.searchDocument(pageNo, pageSize, keyword, "title", "content");
-            page = topicService.search(pageNo, pageSize, keyword);
+            page = elasticSearchService.searchDocument(pageNo, pageSize, keyword, "title", "content");
+            // page = topicService.search(pageNo, pageSize, keyword);
         }
 
         DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_28);

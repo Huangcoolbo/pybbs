@@ -39,8 +39,8 @@
                         </span>
                         </div>
                         <small class="text-muted" id="chatWithMeta">
-                            <#if activeDialog??>
-                                我 · ${model.formatDate(activeDialog.lastMessageTime)!}
+                            <#if dialog??>
+                                 ${model.formatDate(messages[messages?size-1].inTime)}
                             </#if>
                         </small>
                         <#-- 未读徽章之类你也可以放在这里，比如 activeDialog.unreadCount -->
@@ -78,6 +78,7 @@
                                     </div>
                                 </#if>
                             </#list>
+
                         <#else>
                             <div class="text-muted text-center mt-5" id="noDialogHint">
                                 请选择左侧的一个会话开始私信

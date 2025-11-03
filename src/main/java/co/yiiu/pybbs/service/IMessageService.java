@@ -17,6 +17,8 @@ public interface IMessageService {
     // 删除会话下的所有消息
     void deleteByDialog(Integer dialogId);
 
+    Message selectById(Integer MessageId);
+
     // 撤回一条私信,
 
     //Todo 标记消息为已读,感觉不需要，Message有getisRead，等下看作者写的通知已读

@@ -1,6 +1,8 @@
 package co.yiiu.pybbs.controller.api;
 
+import co.yiiu.pybbs.model.Dialog;
 import co.yiiu.pybbs.model.Message;
+import co.yiiu.pybbs.service.impl.DialogService;
 import co.yiiu.pybbs.service.impl.MessageService;
 import co.yiiu.pybbs.util.Result;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,8 @@ import java.util.Map;
 public class MessageApiController extends BaseApiController{
     @Resource
     private MessageService messageService;
+    @Resource
+    private DialogService dialogService;
 
     @PostMapping("/{id}")
     public Result insert(@RequestBody Map<String, Object> body) {
@@ -30,6 +34,11 @@ public class MessageApiController extends BaseApiController{
         message.setInTime(new Date());
 
         message = messageService.insert(message);
+
+        Dialog dialog = dialogService.selectById(dialogId);
+        dialog.setLastMessageId(message.getId());
+        dialog.setLastMessage(message.getContent());
+        dialogService.update(dialog);
         return success(message);
     }
 }

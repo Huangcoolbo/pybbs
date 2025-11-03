@@ -1,6 +1,10 @@
 package co.yiiu.pybbs.service.impl;
 
+import co.yiiu.pybbs.config.websocket.MyWebSocket;
+import co.yiiu.pybbs.mapper.DialogMapper;
 import co.yiiu.pybbs.mapper.MessageMapper;
+import co.yiiu.pybbs.model.Dialog;
+import co.yiiu.pybbs.model.User;
 import co.yiiu.pybbs.service.IMessageService;
 import co.yiiu.pybbs.model.Message;
 import co.yiiu.pybbs.service.ISystemConfigService;
@@ -15,6 +19,10 @@ public class MessageService implements IMessageService {
     @Resource
     private MessageMapper messageMapper;
     @Resource
+    private DialogMapper dialogMapper;
+    @Resource
+    private UserService userService;
+    @Resource
     private ISystemConfigService systemConfigService;
     // 获取会话的所有消息
     @Override
@@ -28,6 +36,23 @@ public class MessageService implements IMessageService {
     @Override
     public Message insert(Message message) {
         messageMapper.insert(message);
+
+        // 通知
+        Dialog dialog = selectDialogByMessageId(message.getId());
+        Integer toUserId;
+        Integer userAId = dialog.getUserAId();
+        Integer userBId = dialog.getUserBId();
+        if(message.getSenderId().equals(userAId)) {
+            toUserId = userBId;
+        } else {
+            toUserId = userAId;
+        }
+        User toUser = userService.selectById(toUserId);
+        User senderUser = userService.selectById(message.getSenderId());
+        String emailTitle = "%s 给你发送了一条信息";
+        if(systemConfigService.selectAllConfig().get("websocket").equals("1")) {
+            MyWebSocket.emit(toUser.getId(), new co.yiiu.pybbs.util.Message("dialog_message", String.format(emailTitle, senderUser.getUsername())));
+        }
         return message;
     }
 
@@ -55,6 +80,17 @@ public class MessageService implements IMessageService {
         for(Message message : messages) {
             messageMapper.deleteById(message.getId());
         }
+    }
+
+    @Override
+    public Message selectById(Integer MessageId) {
+        return messageMapper.selectById(MessageId);
+    }
+
+    public Dialog selectDialogByMessageId(Integer messageId) {
+        Message message = messageMapper.selectById(messageId);
+        Integer dialogid = message.getDialogId();
+        return dialogMapper.selectById(dialogid);
     }
 
 }
