@@ -19,4 +19,15 @@ public interface IIndexedService {
     // 删除所有话题索引
     void batchDeleteIndex();
 
+    // 索引会话所有消息
+    void indexAllMessage(Integer dialogId);
+
+    // 索引绘画消息
+    void indexMessage(String id, String dialogId, String message);
+
+    // 删除消息索引
+    void deleteMessageIndex(String id);
+
+    // 删除所有消息索引
+    public void batchDeleteMessageIndex();
 }

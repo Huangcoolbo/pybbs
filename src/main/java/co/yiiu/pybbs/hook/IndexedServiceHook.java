@@ -25,4 +25,20 @@ public class IndexedServiceHook {
     public void batchDeleteIndex() {
     }
 
+    @Pointcut("execution(public * co.yiiu.pybbs.service.IIndexedService.indexAllMessage(..))")
+    public void indexAllMessage() {
+    }
+
+    @Pointcut("execution(public * co.yiiu.pybbs.service.IIndexedService.indexMessage(..))")
+    public void indexMessage() {
+    }
+
+    @Pointcut("execution(public * co.yiiu.pybbs.service.IIndexedService.deleteMessageIndex(..))")
+    public void deleteMessageIndex() {
+    }
+
+    @Pointcut("execution(public * co.yiiu.pybbs.service.IIndexedService.batchDeleteMessageIndex(..))")
+    public void batchDeleteMessageIndex() {
+    }
+
 }

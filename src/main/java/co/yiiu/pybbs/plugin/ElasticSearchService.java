@@ -24,6 +24,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
@@ -54,6 +55,7 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     private String name;
 
     public static XContentBuilder topicMappingBuilder;
+    public static XContentBuilder messageMappingBuilder;
 
     static {
         try {
@@ -78,6 +80,26 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        try {
+            messageMappingBuilder = JsonXContent.contentBuilder()
+                    .startObject()
+                    .startObject("properties")
+                    .startObject(("dialogId"))
+                    .field("type", "integer")
+                    .field("index", "true")
+                    .endObject()
+                    .startObject("message")
+                    .field("type", "text")
+                    .field("analyzer", "ik_max_word")
+                    .field("search_analyzer", "ik_smart")
+                    .field("index", "true")
+                    .endObject()
+                    .endObject()
+                    .endObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -89,13 +111,18 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
             String host = systemConfigHost.getValue();
             SystemConfig systemConfigPort = systemConfigService.selectByKey("elasticsearch_port");
             String port = systemConfigPort.getValue();
-            SystemConfig systemConfigName = systemConfigService.selectByKey("elasticsearch_index");
-            name = systemConfigName.getValue();
+            SystemConfig systemConfigindex = systemConfigService.selectByKey("elasticsearch_index");
+            // index = systemConfigindex.getValue();
 
             if (StringUtils.isEmpty(host) || StringUtils.isEmpty(port)) return null;
             client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, Integer.parseInt(port), "http")));
             // 判断索引是否存在，不存在创建
-            if (!this.existIndex()) this.createIndex("topic", topicMappingBuilder);
+            if (!this.existIndex("topic")){
+                this.createIndex("topic","topic", topicMappingBuilder);
+            }
+            if (!this.existIndex("message")){
+                this.createIndex("message","message", messageMappingBuilder);
+            }
             return client;
         } catch (NumberFormatException e) {
             log.error(e.getMessage());
@@ -104,12 +131,12 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 创建索引 PUT http://localhost:9200/topic
-    public boolean createIndex(String type, XContentBuilder mappingBuilder) {
+    public boolean createIndex(String index, String type, XContentBuilder mappingBuilder) {
         try {
             if (this.instance() == null) return false;
-            // 创建索引的请求
-            CreateIndexRequest request = new CreateIndexRequest(name);
-            request.settings(Settings.builder().put("index.number_of_shards", 1).put("index.number_of_shards", 5));
+            // 创建索引的请求（index为索引名）
+            CreateIndexRequest request = new CreateIndexRequest(index);
+            request.settings(Settings.builder().put("index.number_of_shards", 1).put("index.number_of_replicas", 1));
             // 相当于创建表结构的语句
             if (mappingBuilder != null) request.mapping(type, mappingBuilder);
             // 向 ES 发送一个 创建索引请求。
@@ -122,11 +149,12 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 检查索引是否存在
-    public boolean existIndex() {
+    public boolean existIndex(String index) {
         try {
             if (this.instance() == null) return false;
             GetIndexRequest request = new GetIndexRequest();
-            request.indices(name);
+            // request.indices(index);
+            request.indices(index);
             request.local(false);
             request.humanReadable(true);
             return client.indices().exists(request, RequestOptions.DEFAULT);
@@ -137,10 +165,10 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 删除索引
-    public boolean deleteIndex() {
+    public boolean deleteIndex(String index) {
         try {
             if (this.instance() == null) return false;
-            DeleteIndexRequest request = new DeleteIndexRequest(name);
+            DeleteIndexRequest request = new DeleteIndexRequest(index);
             request.indicesOptions(IndicesOptions.LENIENT_EXPAND_OPEN);
             AcknowledgedResponse response = client.indices().delete(request, RequestOptions.DEFAULT);
             return response.isAcknowledged();
@@ -149,12 +177,12 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
             return false;
         }
     }
-
+    // 消息的会话号也放在字段里，对应message表里的dialogId字段
     // 创建文档
-    public void createDocument(String type, String id, Map<String, Object> source) {
+    public void createDocument(String index, String type, String id, Map<String, Object> source) {
         try {
             if (this.instance() == null) return;
-            IndexRequest request = new IndexRequest(name, type, id);
+            IndexRequest request = new IndexRequest(index, type, id);
             // 新增文档数据
             request.source(source);
             // 执行请求
@@ -165,10 +193,10 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 更新文档
-    public void updateDocument(String type, String id, Map<String, Object> source) {
+    public void updateDocument(String index, String type, String id, Map<String, Object> source) {
         try {
             if (this.instance() == null) return;
-            UpdateRequest request = new UpdateRequest(name, type, id);
+            UpdateRequest request = new UpdateRequest(index, type, id);
             request.doc(source);
             client.update(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
@@ -177,10 +205,10 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 删除文档
-    public void deleteDocument(String type, String id) {
+    public void deleteDocument(String index, String type, String id) {
         try {
             if (this.instance() == null) return;
-            DeleteRequest request = new DeleteRequest(name, type, id);
+            DeleteRequest request = new DeleteRequest(index, type, id);
             client.delete(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -188,7 +216,7 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 批量创建文档
-    public void bulkDocument(String type, Map<String, Map<String, Object>> sources) {
+    public void bulkDocument(String index, String type, Map<String, Map<String, Object>> sources) {
         try {
             if (this.instance() == null) return;
             BulkRequest requests = new BulkRequest();
@@ -197,7 +225,7 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
             while (it.hasNext()) {
                 count++;
                 String next = it.next();
-                IndexRequest request = new IndexRequest(name, type, next);
+                IndexRequest request = new IndexRequest(index, type, next);
                 request.source(sources.get(next));
                 requests.add(request);
                 if (count % 1000 == 0) {
@@ -213,14 +241,14 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
     }
 
     // 批量删除文档
-    public void bulkDeleteDocument(String type, List<Integer> ids) {
+    public void bulkDeleteDocument(String index, String type, List<Integer> ids) {
         try {
             if (this.instance() == null) return;
             BulkRequest requests = new BulkRequest();
             int count = 0;
             for (Integer id : ids) {
                 count++;
-                DeleteRequest request = new DeleteRequest(name, type, String.valueOf(id));
+                DeleteRequest request = new DeleteRequest(index, type, String.valueOf(id));
                 requests.add(request);
                 if (count % 1000 == 0) {
                     client.bulk(requests, RequestOptions.DEFAULT);
@@ -243,13 +271,19 @@ public class ElasticSearchService implements BaseService<RestHighLevelClient> {
      * @param fields   要查询的字段，可以为多个 这里为"title","content"
      * @return 分页对象 {@link Page}
      */
-    public MyPage<Map<String, Object>> searchDocument(Integer pageNo, Integer pageSize, String keyword, String... fields) {
+    public MyPage<Map<String, Object>> searchDocument(String index, Integer dialogId, Integer pageNo, Integer pageSize, String keyword, String... fields) {
         try {
             if (this.instance() == null) return new MyPage<>();
-            SearchRequest request = new SearchRequest(name);
+            SearchRequest request = new SearchRequest(index);
             SearchSourceBuilder builder = new SearchSourceBuilder();
             // “在 title 和 content 两个字段里查包含 keyword 的文档
-            builder.query(QueryBuilders.multiMatchQuery(keyword, fields));
+            BoolQueryBuilder bool = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.multiMatchQuery(keyword, fields)); // 原来的关键词多字段匹配
+            if (dialogId != null && dialogId > 0) {
+                bool.filter(QueryBuilders.termQuery("dialogId", dialogId));
+            }
+            builder.query(bool);
+
             builder.from((pageNo - 1) * pageSize).size(pageSize);
             request.source(builder);
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);

@@ -30,4 +30,24 @@ public class IndexedService implements IIndexedService {
     @Override
     public void batchDeleteIndex() {
     }
+
+    // 索引会话所有消息
+    @Override
+    public void indexAllMessage(Integer dialogId) {
+    }
+
+    // 索引绘画消息
+    @Override
+    public void indexMessage(String id, String dialogId, String message) {
+    }
+
+    // 删除消息索引
+    @Override
+    public void deleteMessageIndex(String id) {
+    }
+
+    // 删除所有消息索引
+    @Override
+    public void batchDeleteMessageIndex() {
+    }
 }

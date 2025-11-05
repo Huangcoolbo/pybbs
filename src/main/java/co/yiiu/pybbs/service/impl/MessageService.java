@@ -24,6 +24,8 @@ public class MessageService implements IMessageService {
     private UserService userService;
     @Resource
     private ISystemConfigService systemConfigService;
+    @Resource
+    private IndexedService indexedService;
     // 获取会话的所有消息
     @Override
     public List<Message> selectByDialog(Integer dialogId) {
@@ -53,6 +55,8 @@ public class MessageService implements IMessageService {
         if(systemConfigService.selectAllConfig().get("websocket").equals("1")) {
             MyWebSocket.emit(toUser.getId(), new co.yiiu.pybbs.util.Message("dialog_message", String.format(emailTitle, senderUser.getUsername())));
         }
+        // 添加会话消息索引
+        indexedService.indexMessage(String.valueOf(message.getId()), String.valueOf(dialog.getId()), message.getContent());
         return message;
     }
 

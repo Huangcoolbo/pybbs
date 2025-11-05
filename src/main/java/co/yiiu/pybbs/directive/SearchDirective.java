@@ -6,12 +6,15 @@ import co.yiiu.pybbs.service.ITopicService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import freemarker.core.Environment;
 import freemarker.template.*;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfig;
 
 /**
  * Created by tomoya.
@@ -20,6 +23,7 @@ import java.util.Map;
  */
 @Component
 public class SearchDirective implements TemplateDirectiveModel {
+    private Logger log = LoggerFactory.getLogger(SearchDirective.class);
 
     @Resource
     private ISystemConfigService systemConfigService;
@@ -36,7 +40,8 @@ public class SearchDirective implements TemplateDirectiveModel {
         Integer pageNo = Integer.parseInt(map.get("pageNo").toString());
         if (!StringUtils.isEmpty(keyword)) {
             Integer pageSize = Integer.parseInt(systemConfigService.selectAllConfig().get("page_size").toString());
-            page = elasticSearchService.searchDocument(pageNo, pageSize, keyword, "title", "content");
+
+            page = elasticSearchService.searchDocument("topic", 0, pageNo, pageSize, keyword, "title", "content");
             // page = topicService.search(pageNo, pageSize, keyword);
         }
 

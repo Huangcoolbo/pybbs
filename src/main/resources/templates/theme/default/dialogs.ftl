@@ -50,6 +50,37 @@
                     </div>
 
                     <!-- 中部：消息区域（可滚动，占据剩余空间） -->
+<#--                    查询返回类型
+                        dialogId:Integer
+                        searchPage:Page<Message>
+-->
+                    <#if dialog??>
+                        <form class="form-inline my-2 my-lg-0 ml-2 d-none d-md-block" action="/messages/search_message" method="get" style="position:relative;">
+                            <input type="hidden" name="dialogId" value="${dialog.id}">
+                            <div class="input-group" id="msg-search-box">
+                                <input class="form-control" type="search" name="kw" placeholder="回车搜索" value="${kw!}" required aria-label="Search">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-success" type="submit">${i18n.getMessage("search")}</button>
+                                </div>
+                            </div>
+
+                            <div id="msg-search-result"
+                                 class="list-group position-absolute w-100 shadow-sm"
+                                 style="top:100%; left:0; max-height:320px; overflow:auto; z-index:1000; display:${(showSearch?? && showSearch)?string('block','none')}">
+                                <#if searchPage?? && searchPage.records?size gt 0>
+                                    <#list searchPage.records as m>
+                                        <a class="list-group-item list-group-item-action"
+                                           href="/dialogs/${dialog.id}?goto=${m.id}">
+                                            ${m.message?html}
+                                        </a>
+                                    </#list>
+                                <#else>
+                                    <div class="list-group-item text-muted">没有结果</div>
+                                </#if>
+                            </div>
+                        </form>
+                    </#if>
+
                     <div class="card-body flex-grow-1"
                          id="messageArea"
                          style="overflow-y:auto; background-color:#fafafa;">
@@ -63,7 +94,7 @@
                                         <div class="small text-muted mb-1">
                                             我 · ${model.formatDate(msg.inTime)!}
                                         </div>
-                                        <div class="p-2 rounded bg-success text-white" style="max-width:70%;">
+                                        <div id="msg-${msg.id}" class="p-2 rounded bg-success text-white" style="max-width:70%;">
                                             ${msg.content!?html}
                                         </div>
                                     </div>
@@ -72,7 +103,7 @@
                                         <div class="small text-muted mb-1">
                                             ${msg.senderUsername!toUser.username} · ${model.formatDate(msg.inTime)!}
                                         </div>
-                                        <div class="p-2 rounded border bg-white" style="max-width:70%;">
+                                        <div id="msg-${msg.id}" class="p-2 rounded border bg-white" style="max-width:70%;">
                                             ${msg.content!?html}
                                         </div>
                                     </div>
@@ -170,5 +201,81 @@
             });
         });
     </script>
+<#--    搜素结果-消息高亮跳转-->
+    <style>
+        /* 明显的高亮闪烁动画 */
+        @keyframes highlightFlash {
+            0%   { background-color: #fff3cd; }   /* 亮黄 */
+            50%  { background-color: #ffe082; }   /* 更亮一点 */
+            100% { background-color: #fff3cd; }   /* 保持亮黄 */
+        }
+
+        /* 给目标消息添加阴影和边框 */
+        .highlight-msg {
+            animation: highlightFlash 1.5s ease-in-out infinite alternate;
+            border: 2px solid #ffca28;
+            box-shadow: 0 0 10px rgba(255, 202, 40, 0.8);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+    </style>
+
+    <script>
+        (function() {
+            var params = new URLSearchParams(location.search);
+            var gotoId = params.get('goto');
+            if (gotoId) {
+                var el = document.getElementById('msg-' + gotoId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlight-msg');
+
+                    // 5 秒后自动移除高亮
+                    setTimeout(function() {
+                        el.classList.remove('highlight-msg');
+                    }, 5000);
+                }
+            }
+        })();
+    </script>
+<#--    搜素结果-消息高亮跳转-->
+
+    <!-- 消息搜索结果面板交互脚本 -->
+    <script>
+        $(function () {
+            var $box = $("#msg-search-box");          // 包住输入框的容器
+            var $panel = $("#msg-search-result");     // 下拉结果面板
+
+            // 1) 点击页面空白处时关闭
+            $(document).on("click", function (e) {
+                if (!$(e.target).closest($box).length && !$(e.target).closest($panel).length) {
+                    $panel.hide();
+                }
+            });
+
+            // 2) 点击输入框或面板内部，阻止冒泡（避免被上面的 document 点击给关掉）
+            $box.on("click", function (e) { e.stopPropagation(); });
+            $panel.on("click", function (e) { e.stopPropagation(); });
+
+            // 3) 输入框聚焦时显示（你也可以在有关键字且有结果时才显示）
+            $box.find('input[name="kw"]').on("focus", function () {
+                if ($panel.children().length > 0) $panel.show();
+            });
+
+            // 4) 按 ESC 关闭
+            $(document).on("keydown", function (e) {
+                if (e.key === "Escape") $panel.hide();
+            });
+
+            // 5) 点击某条结果后关闭（延时是为了让链接跳转不被阻断）
+            $panel.on("click", "a.list-group-item", function () {
+                setTimeout(function(){ $panel.hide(); }, 0);
+            });
+
+            // 6) 可选：窗口滚动/尺寸变化也关闭
+            $(window).on("scroll resize", function(){ $panel.hide(); });
+        });
+    </script>
+
 
 </@html>
